@@ -1,64 +1,64 @@
 import requests
 import json
-from PIL import Image
-import io
 
-# Connect to Azure endpoint through https and subscription key
-endpoint = "https://australiaeast.api.cognitive.microsoft.com/"
-sub_key = "69c7cdcb3ea549d484ad20b632919823"
+# Custom Vision endpoint and prediction key
+endpoint = "https://australiaeast.api.cognitive.microsoft.com/"  # Replace with your endpoint
+prediction_key = "69c7cdcb3ea549d484ad20b632919823"  # Replace with your Prediction Key
+project_id = "d7b27113-f02a-4f82-98b5-6ae4b14d494c"  # Replace with your Project ID
+iteration_name = "Iteration 2"  # Replace with your Iteration Name
 
 # Local image path
-image_path = r"C:\Users\SQ488TD\OneDrive - EY\Desktop\test-images-1\dirty\dirty14.jpeg"
+image_path = r"C:\\Users\\SQ488TD\\OneDrive - EY\\Desktop\\test-images-1\\dirty\\dirty14.jpeg"  # Replace with your image path
 
-# Ensure the API version is correct
-analyze_url = endpoint + "vision/v3.2/analyze"
+# Custom Vision prediction URL
+# prediction_url = f"{endpoint}/customvision/v3.0/Prediction/{project_id}/detect/iterations/{iteration_name}/image"
+prediction_url = "https://australiaeast.api.cognitive.microsoft.com/customvision/v3.0/Prediction/d7b27113-f02a-4f82-98b5-6ae4b14d494c/detect/iterations/Iteration2/image"
 
 headers = {
-    'Ocp-Apim-Subscription-Key': sub_key,
+    'Prediction-Key': prediction_key,
     'Content-Type': 'application/octet-stream'
 }
 
-params = {
-    'visualFeatures': 'Objects'
-}
+try:
+    # Read the image file
+    with open(image_path, 'rb') as image_file:
+        image_data = image_file.read()
 
-# Resize the image (optional)
-with Image.open(image_path) as img:
-    img = img.resize((800, 800))  # Resize to 800x800 pixels
-    img_byte_arr = io.BytesIO()
-    img.save(img_byte_arr, format='JPEG')
-    image_data = img_byte_arr.getvalue()
+    # Make the API request
+    res = requests.post(prediction_url, headers=headers, data=image_data)
 
-# Make the API request
-res = requests.post(analyze_url, headers=headers, params=params, data=image_data)
+    # Debugging: Print the response content in case of an error
+    if res.status_code != 200:
+        print(f"Error: {res.status_code}")
+        print(res.text)
 
-# Debugging: Print the response content in case of an error
-if res.status_code != 200:
-    print(f"Error: {res.status_code}")
-    print(res.text)
+    res.raise_for_status()
 
-res.raise_for_status()
+    # Get the JSON response
+    analysis = res.json()
 
-# Get the JSON response
-analysis = res.json()
+    # Save the JSON response to a file
+    with open('custom_vision_results.json', 'w') as json_file:
+        json.dump(analysis, json_file, indent=4)
 
-# Save the JSON response to a file
-with open('object_detection_results.json', 'w') as json_file:
-    json.dump(analysis, json_file, indent=4)
+    print("Custom Vision results saved to custom_vision_results.json")
 
-print("Object detection results saved to object_detection_results.json")
+    # Extract bounding box parameters
+    if 'predictions' in analysis:
+        for prediction in analysis['predictions']:
+            tag_name = prediction['tagName']
+            probability = prediction['probability']
+            bounding_box = prediction['boundingBox']
+            left = bounding_box['left']
+            top = bounding_box['top']
+            width = bounding_box['width']
+            height = bounding_box['height']
+            print(f"Tag: {tag_name}, Probability: {probability}")
+            print(f"Bounding Box: left={left}, top={top}, width={width}, height={height}")
+    else:
+        print("No objects detected.")
 
-# Extract bounding box parameters
-if 'objects' in analysis:
-    for obj in analysis['objects']:
-        object_type = obj['object']
-        confidence = obj['confidence']
-        rectangle = obj['rectangle']
-        x = rectangle['x']
-        y = rectangle['y']
-        w = rectangle['w']
-        h = rectangle['h']
-        print(f"Object: {object_type}, Confidence: {confidence}")
-        print(f"Bounding Box: x={x}, y={y}, width={w}, height={h}")
-else:
-    print("No objects detected.")
+except FileNotFoundError:
+    print(f"File not found: {image_path}")
+except requests.exceptions.RequestException as e:
+    print(f"An error occurred during the API request: {e}")
