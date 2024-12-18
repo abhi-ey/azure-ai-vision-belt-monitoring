@@ -2,13 +2,14 @@ import requests
 import json
 from PIL import Image
 import io
+import os
 
 # Connect to Azure endpoint through https and subscription key
 endpoint = "https://australiaeast.api.cognitive.microsoft.com/"
 sub_key = "69c7cdcb3ea549d484ad20b632919823"
 
 # Local image path
-image_path = r"C:\Users\SQ488TD\OneDrive - EY\Desktop\test-images-1\dirty\dirty14.jpeg"
+image_path = r"C:\Users\DY773VE\OneDrive - EY\Desktop\azure-ai-vision-belt-monitoring\tape_chair.jpeg"
 
 # Ensure the API version is correct
 analyze_url = endpoint + "vision/v3.2/analyze"
@@ -19,12 +20,12 @@ headers = {
 }
 
 params = {
-    'visualFeatures': 'Objects'
+    'visualFeatures': 'Objects,Tags,Categories'
 }
 
 # Resize the image (optional)
 with Image.open(image_path) as img:
-    img = img.resize((800, 800))  # Resize to 800x800 pixels
+    #img = img.resize((800, 800))  # Resize to 800x800 pixels
     img_byte_arr = io.BytesIO()
     img.save(img_byte_arr, format='JPEG')
     image_data = img_byte_arr.getvalue()

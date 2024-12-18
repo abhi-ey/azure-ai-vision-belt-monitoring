@@ -1,20 +1,33 @@
 {
-    "objects": [
+    "categories": [
         {
-            "rectangle": {
-                "x": 163,
-                "y": 401,
-                "w": 137,
-                "h": 76
-            },
-            "object": "animal",
-            "confidence": 0.518
+            "name": "others_",
+            "score": 0.02734375
+        },
+        {
+            "name": "outdoor_",
+            "score": 0.00390625
         }
     ],
-    "requestId": "b68633bd-9691-469f-a1b4-8975c5936c04",
+    "tags": [
+        {
+            "name": "autumn",
+            "confidence": 0.8502470254898071
+        },
+        {
+            "name": "ground",
+            "confidence": 0.7675023078918457
+        },
+        {
+            "name": "fall",
+            "confidence": 0.6047565937042236
+        }
+    ],
+    "objects": [],
+    "requestId": "374333e4-8968-4afb-835e-dc0a3c80b816",
     "metadata": {
-        "height": 800,
-        "width": 800,
+        "height": 4032,
+        "width": 2268,
         "format": "Jpeg"
     },
     "modelVersion": "2021-05-01"
