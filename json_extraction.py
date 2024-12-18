@@ -1,5 +1,8 @@
 import requests
 import json
+import sqlite3
+from PIL import Image
+import os
 
 endpoint = "https://australiaeast.api.cognitive.microsoft.com/"
 prediction_key = "69c7cdcb3ea549d484ad20b632919823"
@@ -15,7 +18,19 @@ headers = {
     'Content-Type': 'application/octet-stream'
 }
 
+db_path = 'predictions.db'
+
+json_file_path = 'custom_vision_results.json'
+
 try:
+
+    if os.path.exists(json_file_path):
+        os.remove(json_file_path)
+        print(f"Deleted existing JSON file: {json_file_path}")
+    
+    with Image.open(image_path) as img:
+        image_width, image_height = img.size
+
     with open(image_path, 'rb') as image_file:
         image_data = image_file.read()
 
@@ -38,6 +53,22 @@ try:
 
     print("Custom Vision results saved to custom_vision_results.json")
 
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS predictions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tag_name TEXT,
+            probability REAL,
+            left REAL,
+            top REAL,
+            width REAL,
+            height REAL,
+            image_path TEXT
+        )
+    ''')
+
     if filtered_predictions:
         for prediction in filtered_predictions:
             tag_name = prediction['tagName']
@@ -47,13 +78,39 @@ try:
             top = bounding_box['top']
             width = bounding_box['width']
             height = bounding_box['height']
+
+            absolute_left = left * image_width
+            absolute_top = top * image_height
+            absolute_width = width * image_width
+            absolute_height = height * image_height
+
+
             print(f"Tag: {tag_name}, Probability: {probability}")
-            print(f"Bounding Box: left={left}, top={top}, width={width}, height={height}")
+            print(f"Bounding Box: left={absolute_left}, top={absolute_top}, width={absolute_width}, height={absolute_height}")
             print(" ")
+
+            cursor.execute(
+                """
+                INSERT INTO predictions (tag_name, probability, left, top, width, height, image_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (tag_name, probability, left, top, width, height, image_path)
+            )
+
+            conn.commit()
     else:
         print("No objects detected above the threshold.")
 
+    cursor.close()
+    conn.close()
+
+
+# Error handling
 except FileNotFoundError:
     print(f"File not found: {image_path}")
 except requests.exceptions.RequestException as e:
     print(f"An error occurred during the API request: {e}")
+except sqlite3.Error as e:
+    print(f"An error occurred with the SQLite database: {e}")
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")
