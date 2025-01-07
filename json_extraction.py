@@ -107,7 +107,7 @@ try:
             absolute_height = height * image_height
 
             print(f"Tag: {tag_name}, Probability: {probability}")
-            print(f"Bounding Box: left={absolute_left}, top={absolute_top}, width={absolute_width}, height={absolute_height}, area ={area}")
+            print(f"Bounding Box: left={absolute_left}, top={absolute_top}, width={absolute_width}, height={absolute_height}, area ={box_area}")
             print(" ")
 
             cursor.execute(
