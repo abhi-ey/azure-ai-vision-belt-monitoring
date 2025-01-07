@@ -3,13 +3,19 @@ import json
 import sqlite3
 from PIL import Image
 import os
+import argparse
+
+parser = argparse.ArgumentParser(description='Process an Image with Azure Custom Vision and store results in SQLite.')
+parser.add_argument('image_path', type=str, help='Path to image file')
+args = parser.parse_args()
+
 
 endpoint = "https://australiaeast.api.cognitive.microsoft.com/"
 prediction_key = "69c7cdcb3ea549d484ad20b632919823"
 project_id = "d7b27113-f02a-4f82-98b5-6ae4b14d494c"
 iteration_name = "Iteration2"
 
-image_path = r"C:\\Users\\SQ488TD\\OneDrive - EY\\Desktop\\test-images-1\\dirty\\dirty14.jpeg"
+image_path = args.image_path
 
 prediction_url = f"{endpoint}/customvision/v3.0/Prediction/{project_id}/detect/iterations/{iteration_name}/image"
 
@@ -109,7 +115,7 @@ try:
                 INSERT INTO predictions (tag_name, probability, left, top, width, height, image_path, area)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (tag_name, probability, left, top, width, height, image_path, area)
+                (tag_name, probability, left, top, width, height, image_path, box_area)
             )
 
             conn.commit()
