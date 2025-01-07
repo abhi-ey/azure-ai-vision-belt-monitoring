@@ -7,6 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Process an Image with Azure Custom Vision and store results in SQLite.')
 parser.add_argument('image_path', type=str, help='Path to image file')
+parser.add_argument('--threshold', type=float, help='Probability threshold for filtering predictions')
 args = parser.parse_args()
 
 
@@ -16,6 +17,7 @@ project_id = "d7b27113-f02a-4f82-98b5-6ae4b14d494c"
 iteration_name = "Iteration2"
 
 image_path = args.image_path
+threshold = args.threshold
 
 prediction_url = f"{endpoint}/customvision/v3.0/Prediction/{project_id}/detect/iterations/{iteration_name}/image"
 
@@ -25,14 +27,12 @@ headers = {
 }
 
 db_path = 'predictions.db'
-
 json_file_path = 'custom_vision_results.json'
 
 try:
 
     if os.path.exists(json_file_path):
         os.remove(json_file_path)
-        # print(f"Deleted existing JSON file: {json_file_path}")
     
     with Image.open(image_path) as img:
         image_width, image_height = img.size
@@ -50,7 +50,6 @@ try:
 
     analysis = res.json()
 
-    threshold = 0.6
     filtered_predictions = [prediction for prediction in analysis.get('predictions', []) if prediction['probability'] > threshold]
 
     for prediction in filtered_predictions:
@@ -65,7 +64,6 @@ try:
     with open('custom_vision_results.json', 'w') as json_file:
         json.dump(analysis, json_file, indent=4)
 
-    # print("Custom Vision results saved to custom_vision_results.json")
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -88,7 +86,6 @@ try:
 
     cursor.execute('DELETE FROM predictions')
     conn.commit()
-    # print("Cleared the predictions table.")
 
     if filtered_predictions:
         for prediction in filtered_predictions:
