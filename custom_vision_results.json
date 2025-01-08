@@ -1,8 +1,4 @@
 {
-    "id": "c51caed9-baca-4d98-a546-99e2fd8b91b3",
-    "project": "d7b27113-f02a-4f82-98b5-6ae4b14d494c",
-    "iteration": "23a7bcd8-ed17-4035-9b2a-7ecc61b5cbe5",
-    "created": "2025-01-07T23:57:53.685Z",
     "predictions": [
         {
             "probability": 0.9996213,
@@ -14,7 +10,10 @@
                 "width": 0.073587626,
                 "height": 0.06696975
             },
-            "area": 11098.182351538002
+            "area": 11098.182351538002,
+            "image_path": "C:\\\\Users\\\\SQ488TD\\\\OneDrive - EY\\\\Desktop\\\\test-images-1\\\\dirty\\\\dirty14.jpeg",
+            "section_id": 1,
+            "timestamp": "2025-01-08T12:14:44.054992"
         },
         {
             "probability": 0.999482,
@@ -26,7 +25,10 @@
                 "width": 0.16455567,
                 "height": 0.09628987
             },
-            "area": 35683.03925028565
+            "area": 35683.03925028565,
+            "image_path": "C:\\\\Users\\\\SQ488TD\\\\OneDrive - EY\\\\Desktop\\\\test-images-1\\\\dirty\\\\dirty14.jpeg",
+            "section_id": 1,
+            "timestamp": "2025-01-08T12:14:44.054992"
         },
         {
             "probability": 0.99910945,
@@ -38,7 +40,10 @@
                 "width": 0.070762336,
                 "height": 0.04339926
             },
-            "area": 6915.966357147103
+            "area": 6915.966357147103,
+            "image_path": "C:\\\\Users\\\\SQ488TD\\\\OneDrive - EY\\\\Desktop\\\\test-images-1\\\\dirty\\\\dirty14.jpeg",
+            "section_id": 1,
+            "timestamp": "2025-01-08T12:14:44.054992"
         },
         {
             "probability": 0.99804735,
@@ -50,7 +55,10 @@
                 "width": 0.12681842,
                 "height": 0.097390294
             },
-            "area": 27814.18898535166
+            "area": 27814.18898535166,
+            "image_path": "C:\\\\Users\\\\SQ488TD\\\\OneDrive - EY\\\\Desktop\\\\test-images-1\\\\dirty\\\\dirty14.jpeg",
+            "section_id": 1,
+            "timestamp": "2025-01-08T12:14:44.054992"
         },
         {
             "probability": 0.9517597,
@@ -62,19 +70,40 @@
                 "width": 0.08103067,
                 "height": 0.041882753
             },
-            "area": 7642.809533401717
+            "area": 7642.809533401717,
+            "image_path": "C:\\\\Users\\\\SQ488TD\\\\OneDrive - EY\\\\Desktop\\\\test-images-1\\\\dirty\\\\dirty14.jpeg",
+            "section_id": 1,
+            "timestamp": "2025-01-08T12:14:44.054992"
         },
         {
-            "probability": 0.6930517,
+            "probability": 0.999706,
             "tagId": "0757b067-d832-4204-af63-95ea8d344cc9",
             "tagName": "carryback",
             "boundingBox": {
-                "left": 0.91609275,
-                "top": 0.000992681,
-                "width": 0.0796023,
-                "height": 0.033096205
+                "left": 0.19302686,
+                "top": 0.59770834,
+                "width": 0.20576553,
+                "height": 0.15464282
             },
-            "area": 5932.970656439418
+            "area": 71659.00441412385,
+            "image_path": "C:\\\\Users\\\\SQ488TD\\\\OneDrive - EY\\\\Desktop\\\\test-images-1\\\\dirty\\\\dirty17.jpeg",
+            "section_id": 2,
+            "timestamp": "2025-01-08T12:14:45.103012"
+        },
+        {
+            "probability": 0.9986675,
+            "tagId": "0757b067-d832-4204-af63-95ea8d344cc9",
+            "tagName": "carryback",
+            "boundingBox": {
+                "left": 0.1652369,
+                "top": 0.0,
+                "width": 0.10556476,
+                "height": 0.09824549
+            },
+            "area": 23356.081062243764,
+            "image_path": "C:\\\\Users\\\\SQ488TD\\\\OneDrive - EY\\\\Desktop\\\\test-images-1\\\\dirty\\\\dirty17.jpeg",
+            "section_id": 2,
+            "timestamp": "2025-01-08T12:14:45.103012"
         }
     ]
 }
