@@ -2,192 +2,193 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-############## NOTES ################
-# Run this script with: streamlit run dashboard.py
-# Install streamlit: pip install streamlit
-#####################################
-
-# Page layout
+# Set page configuration
 st.set_page_config(page_title="Conveyor Belt Analytics", layout="wide")
 
-# Header
-st.markdown(
-    """
-    <style>
-    .header {
-        font-size: 36px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 0px;
-        color: #4a4a4a;
-    }
-    .sub-header {
-        font-size: 18px;
-        text-align: center;
-        margin-bottom: 30px;
-        color: #a1a1a1;
-    }
-    </style>
-    <div class="header">Conveyor Belt Analytics</div>
-    <div class="sub-header">Live Monitoring and Predictive Analysis</div>
-    """,
-    unsafe_allow_html=True,
-)
+# Load and preprocess data
+@st.cache_data
+def load_data(file_path):
+    try:
+        df = pd.read_excel(file_path, engine="openpyxl")
+    except FileNotFoundError:
+        st.error(f"File not found at {file_path}. Please upload a valid file.")
+        st.stop()
+    return df
 
-# Add a horizontal line for separation
-st.markdown("---")
 
-# Create a three-column layout
-left_column, spacer_column, middle_column, right_column = st.columns([1, 0.2, 3, 1.5])
+file_path = "conveyor_belt_carryback_dataset.xlsx"
+uploaded_file = st.sidebar.file_uploader("Upload Conveyor Data", type=["xlsx"])
+df = load_data(uploaded_file if uploaded_file else file_path)
 
-# Left Column: File upload and metrics
-with left_column:
-    file_path = "conveyor_belt_carryback_dataset.xlsx"  # Default file path
-    # Styled file uploader button
+# Sidebar Navigation with Buttons
+st.sidebar.title("Navigation")
+
+# Initialize session state for navigation
+if "page" not in st.session_state:
+    st.session_state.page = "Overview"
+
+# Navigation buttons
+if st.sidebar.button("Overview"):
+    st.session_state.page = "Overview"
+if st.sidebar.button("Analytics"):
+    st.session_state.page = "Analytics"
+
+# --- Overview Page ---
+if st.session_state.page == "Overview":
+    st.title("Overview: Conveyor Belt Carryback")
+    
+    # Calculate aggregate info
+    total_sections = df["Section_ID"].nunique()
+    carryback_sections = df[df["Carryback_Area"] > 0]["Section_ID"].nunique()
+    carryback_coverage = (carryback_sections / total_sections) * 100
+    
+    # Display summary metrics
     st.markdown(
         """
-        <style>
-        .file-uploader {
-            display: inline-block;
-            font-size: 14px;
-            padding: 5px 10px;
-            background-color: #0078D7;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
-            transition: background-color 0.3s;
-        }
-        .file-uploader:hover {
-            background-color: #005a9e;
-        }
-        .file-uploader input {
-            display: none;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # File uploader
-    # File uploader
-    uploaded_file = st.file_uploader(" ", type=["xlsx"], label_visibility="collapsed")
-    st.markdown(
-        """
-        <style>
-        div.stButton > button {
-            padding: 4px 8px;
-            font-size: 12px;
-            background-color: #0078D7;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        div.stButton > button:hover {
-            background-color: #005a9e;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-
-    if uploaded_file:
-        df = pd.read_excel(uploaded_file, engine="openpyxl")
-    else:
-        try:
-            df = pd.read_excel(file_path, engine="openpyxl")
-        except FileNotFoundError:
-            st.error(f"File not found at {file_path}. Please ensure the file exists.")
-            st.stop()
-
-    # Filter conveyor belts with carryback
-    carryback_df = df[df["Carryback_Area"] > 0]
-
-    # Display box for total sections with carryback
-    total_sections_with_carryback = len(carryback_df["Section_ID"].unique())
-
-    st.markdown(
-        f"""
-        <div style="
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #e8f4fc;
-            border: 2px solid #cce7ff;
-            border-radius: 10px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        ">
-            <h5 style="margin: 0; color: #0078D7;">Sections with Carryback</h5>
-            <p style="margin: 0; font-size: 16px; font-weight: bold; color: #0078D7;">{total_sections_with_carryback}</p>
+        <div style="padding: 10px; background-color: #f1f1f1; border-radius: 10px; text-align: center;">
+            <h3 style="color: #0078D7;">Aggregate Metrics</h3>
+            <p><strong>Total Sections:</strong> {total_sections}</p>
+            <p><strong>Sections with Carryback:</strong> {carryback_sections}</p>
+            <p><strong>Carryback Coverage:</strong> {carryback_coverage:.2f}%</p>
         </div>
+        """.format(
+            total_sections=total_sections,
+            carryback_sections=carryback_sections,
+            carryback_coverage=carryback_coverage,
+        ),
+        unsafe_allow_html=True,
+    )
+
+    # Optional chart
+    st.subheader("Carryback Distribution")
+    carryback_chart = alt.Chart(df[df["Carryback_Area"] > 0]).mark_bar().encode(
+        x=alt.X("Section_ID:N", title="Section ID"),
+        y=alt.Y("Carryback_Area:Q", title="Total Carryback Area"),
+        tooltip=["Section_ID", "Carryback_Area"]
+    ).properties(
+        width=800,
+        height=400,
+        title="Total Carryback Area by Section"
+    )
+    st.altair_chart(carryback_chart)
+
+# --- Analytics Page ---
+elif st.session_state.page == "Analytics":
+    st.title("Analytics: Belt and Section Insights")
+    
+        # Hardcoded belt options
+    st.subheader("Select a Belt")
+
+    # Styling for buttons
+    st.markdown(
+        """
+        <style>
+            .button-container {
+                display: flex;
+                gap: 10px;
+            }
+            .button {
+                padding: 10px 20px;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+            }
+            .red-button {
+                background-color: #FF4B4B;
+            }
+            .green-button {
+                background-color: #4CAF50;
+            }
+        </style>
         """,
         unsafe_allow_html=True,
     )
 
+    # Define belt options
+    belt_options = [
+        {"name": "Crusher-Transport Belt", "color": "red"},
+        {"name": "South Transport Belt", "color": "green"},
+        {"name": "North Transport Belt", "color": "green"},
+    ]
 
-    # the Section IDs with carryback
-    st.write("**Section IDs with Carryback:**")
-    sections_with_carryback = carryback_df["Section_ID"].unique()
+    # Initialize selected belt
+    selected_belt = None
 
-    if len(sections_with_carryback) > 0:
-        # Use markdown to create a styled box
+    # Render buttons for each belt
+    st.markdown('<div class="button-container">', unsafe_allow_html=True)
+    for belt in belt_options:
+        if st.button(
+            label=belt["name"],
+            key=belt["name"],  # Unique key for each button
+        ):
+            selected_belt = belt["name"]
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Display the selected belt
+    if selected_belt:
         st.markdown(
             f"""
-            <div style="
-                padding: 10px;
-                margin-bottom: 10px;
-                background-color: #f9f9f9;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
-            ">
-                {'<br>'.join([f"Section {section_id}" for section_id in sections_with_carryback])}
+            <div style="padding: 10px; background-color: #e8f4fc; border-radius: 10px; text-align: center;">
+                <h4 style="color: #0078D7;">{selected_belt}</h4>
+                <p>This data pertains to Belt 1 (hardcoded).</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
-    else:
+
+
+    # Filter sections with carryback
+    carryback_sections = df[df["Carryback_Area"] > 0]["Section_ID"].unique()
+
+    st.subheader("Sections with Carryback")
+    if len(carryback_sections) > 0:
         st.markdown(
-            """
-            <div style="
-                padding: 10px;
-                background-color: #f9f9f9;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
-                color: #555;
-            ">
-                No sections with carryback.
+            f"""
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            {''.join([f'<div style="padding: 10px; background-color: #e8f4fc; border-radius: 5px; border: 1px solid #cce7ff; text-align: center;">Section {section}</div>' for section in carryback_sections])}
             </div>
             """,
             unsafe_allow_html=True,
         )
-
-
-# Middle Column: Graph
-with middle_column:
-    st.subheader("Belt Analytics")
-    if not carryback_df.empty:
-        carryback_chart = alt.Chart(carryback_df).mark_line().encode(
-            x="Timestamp:T",
-            y="Carryback_Area:Q",
-            color="Section_ID:N",
-            tooltip=["Timestamp", "Section_ID", "Carryback_Area"]
-        ).properties(
-            width=450,
-            height=300,
-            title="Carryback Area Over Time"
-        )
-        st.altair_chart(carryback_chart)
     else:
-        st.write("No carryback detected on any conveyor sections.")
+        st.write("No sections with carryback detected.")
 
-# Right Column: Insights
-with right_column:
-    st.subheader("Insights")
-    st.write("- **Days to repair**: 10")
-    st.write("- **High-risk sections**: Section 6, Section 10")
-    st.write("- **Suggested actions**: Regular inspections")
+    # Analytics for sections
+    st.subheader("Section Insights")
+    sections = df["Section_ID"].unique()
+    selected_section = st.selectbox("Select Section", [None] + list(sections))
+    
+    if selected_section:
+        if selected_section:
+            section_df = df[df["Section_ID"] == selected_section]
+            st.subheader(f"Carryback Analytics for Section {selected_section}")
+            
+            # Define the threshold value
+            threshold_value = 300  # Replace with your desired threshold
+
+            # Base chart for carryback data
+            carryback_chart = alt.Chart(section_df).mark_line().encode(
+                x="Timestamp:T",
+                y="Carryback_Area:Q",
+                tooltip=["Timestamp", "Carryback_Area"]
+            ).properties(
+                width=800,
+                height=400,
+                title=f"Carryback Area Over Time for Section {selected_section}"
+            )
+
+            # Add a horizontal rule for the threshold
+            threshold_line = alt.Chart(pd.DataFrame({"Threshold": [threshold_value]})).mark_rule(color="red", strokeDash=[4, 4]).encode(
+                y="Threshold:Q"
+            )
+
+            # Combine the carryback chart and the threshold line
+            combined_chart = carryback_chart + threshold_line
+
+            st.altair_chart(combined_chart)
+
+    else:
+        st.write("Select a section to view detailed analytics.")
